@@ -4,24 +4,16 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
-import { auth } from './firebaseConfig'; // Firebase authentication
-import LoginScreen from './LoginScreen'; // Import LoginScreen
 import { onAuthStateChanged } from 'firebase/auth';
+import { useColorScheme } from '@/components/useColorScheme';
+import { auth } from './firebaseConfig';
+import ProfileSetupScreen from './screens/ProfileSetupScreen'; // Adjust path if needed
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: 'Login', // Set initial route to Login
+  initialRouteName: 'LoginScreen',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -30,7 +22,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -67,12 +58,11 @@ function RootLayoutNav() {
           <>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+            {/* Remove component prop */}
+            <Stack.Screen name="ProfileSetupScreen" options={{ headerShown: true }} />
           </>
         ) : (
-          <Stack.Screen
-            name="LoginScreen"
-            options={{ headerShown: false }}
-          />
+          <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
         )}
       </Stack>
     </ThemeProvider>

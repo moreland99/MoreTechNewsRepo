@@ -1,19 +1,19 @@
-// app/LoginScreen.tsx
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, useColorScheme } from 'react-native';
-import { auth } from './firebaseConfig'; // Adjust the path if needed
+import { auth, firestore } from '../firebaseConfig'; // Adjust the path if needed
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { setDoc, doc } from 'firebase/firestore';
 
 // Define the navigation types
 type RootStackParamList = {
-  Home: undefined; // Define the type for each screen in your navigation stack
+  '(tabs)': undefined; // Define the main tabs route
+  ProfileSetupScreen: undefined;
+  Home: undefined; // If you have a Home route, add it here
 };
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
@@ -22,14 +22,13 @@ const LoginScreen = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false); // Toggle between login and sign up
+  const [isSignUp, setIsSignUp] = useState(false);
   const colorScheme = useColorScheme();
-  const firestore = getFirestore();
 
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate('Home');
+      navigation.navigate('(tabs)'); // Navigate to main tabs
     } catch (error: any) {
       setError(error.message);
     }
@@ -39,20 +38,22 @@ const LoginScreen = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
-
-      // Store additional user info in Firestore
+  
+      // Save basic user info to Firestore
       await setDoc(doc(firestore, 'users', user.uid), {
         firstName: firstName,
         lastName: lastName,
         email: email,
         createdAt: new Date(),
       });
-
-      navigation.navigate('Home');
+  
+      // Redirect to Profile Setup screen
+      navigation.navigate('ProfileSetupScreen');
     } catch (error: any) {
       setError(error.message);
     }
   };
+  
 
   return (
     <View style={[styles.container, colorScheme === 'dark' && styles.containerDark]}>
@@ -78,7 +79,7 @@ const LoginScreen = () => {
           />
         </>
       )}
-      
+
       <TextInput
         style={[styles.input, colorScheme === 'dark' && styles.inputDark]}
         placeholder="Email"
